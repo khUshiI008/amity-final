@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="theme-color" content="#092b50"/>
+<title>Thank you | Amity Online MBA</title>
+<style>
+:root{--navy:#092b50;--navy2:#123f6c;--gold:#ffca05;--ink:#172b43;--muted:#617084;--line:#dce2e8}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.6 Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--ink);background:#f4f6f8;-webkit-font-smoothing:antialiased}
+header{background:#fff;border-bottom:1px solid #e5e9ed}
+.bar{width:min(1100px,calc(100% - 32px));margin:auto;height:68px;display:flex;align-items:center}
+.bar img{height:44px;width:auto;max-width:200px;object-fit:contain}
+.bar .fallback{font-weight:800;color:var(--navy);letter-spacing:-.02em}
+main{width:min(680px,calc(100% - 32px));margin:36px auto 56px}
+.card{background:#fff;border:1px solid var(--line);border-top:5px solid var(--gold);border-radius:10px;padding:40px 32px;text-align:center;box-shadow:0 14px 40px rgba(9,43,80,.08)}
+.tick{width:68px;height:68px;margin:0 auto 18px;border-radius:50%;background:#eaf5ee;color:#256642;display:grid;place-items:center}
+.tick svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+h1{font-size:clamp(28px,5vw,38px);line-height:1.12;letter-spacing:-.035em;color:var(--navy);margin:0 0 12px}
+.lead{color:var(--muted);margin:0 auto 28px;max-width:480px}
+.steps{list-style:none;margin:0 0 28px;padding:0;text-align:left;border-top:1px solid var(--line)}
+.steps li{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;padding:15px 0;border-bottom:1px solid var(--line)}
+.steps b{display:block;color:var(--navy);font-size:15px}
+.steps span{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:2px}
+.steps li>.n{width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--navy);font-weight:900;font-size:14px;line-height:1;margin:0;display:grid;place-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 26px;background:var(--navy);color:#fff;text-decoration:none;border-radius:4px;font-size:13px;font-weight:800;transition:background .18s}
+.btn:hover{background:var(--navy2)}
+.note{font-size:11px;color:#7d8997;margin:22px 0 0;line-height:1.5}
+@media(max-width:520px){.card{padding:32px 20px}.btn{width:100%}}
+</style>
+</head>
+<body>
+<header><div class="bar">
+ <img src="https://amityonline.com/_s/amity_logo_5ee70d67b4_f4e929fb4a_df29242913.svg" alt="Amity University Online" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+ <span class="fallback" style="display:none">Amity University Online</span>
+</div></header>
+<main>
+ <div class="card">
+  <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+  <h1 id="title">Thank you! We have received your details.</h1>
+  <p class="lead">Our admissions team will contact you shortly by phone, WhatsApp or email to guide you on the Amity Online programme you are interested in.</p>
+  <ol class="steps">
+   <li><span class="n">1</span><div><b>Get programme guidance</b><span>Discuss your goals, eligibility, specialisation and fee options with an admissions counsellor.</span></div></li>
+   <li><span class="n">2</span><div><b>Complete your application</b><span>Fill in the application and keep your graduation documents ready.</span></div></li>
+   <li><span class="n">3</span><div><b>Begin your learning journey</b><span>Complete enrolment and get started with your online programme.</span></div></li>
+  </ol>
+  <a class="btn" href="index.html">Back to home</a>
+  <p class="note">Offer, scholarship and EMI cashback availability are subject to confirmation by Amity University Online admissions.</p>
+ </div>
+</main>
+<script>
+try{var n=sessionStorage.getItem('leadName');if(n){var f=n.split(/\s+/)[0];document.getElementById('title').textContent='Thank you, '+f+'! We have received your details.';sessionStorage.removeItem('leadName')}}catch(e){}
+</script>
+</body>
+</html>
