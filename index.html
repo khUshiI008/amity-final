@@ -671,6 +671,8 @@ button,input,select,textarea{font-family:var(--sans)}
    sending=false;submitBtn.disabled=false;submitBtn.textContent='Submit Details';
    warn('We could not submit your details. Please check your connection and try again.');return;
   }
+  /* Request was sent without a network error: allow ONE Lead event on the thank-you page */
+  try{sessionStorage.setItem('leadEventId','lead_'+Date.now()+'_'+Math.random().toString(36).slice(2,10))}catch(_){}
   location.href=THANK_YOU_URL;
  });
 

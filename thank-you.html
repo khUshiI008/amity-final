@@ -42,7 +42,21 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1878608889840802');
 fbq('track', 'PageView');
-fbq('track', 'Lead');
+
+/* Lead: fires ONLY once, right after a successful form submission.
+   index.html sets 'leadEventId' in sessionStorage after the form data is sent.
+   It is removed here as soon as it is read, so a refresh, back/forward visit or
+   a direct visit to this page does not fire Lead again. */
+(function () {
+  var id = null;
+  try {
+    id = sessionStorage.getItem('leadEventId');
+    if (id) sessionStorage.removeItem('leadEventId');
+  } catch (e) {}
+  if (id) {
+    fbq('track', 'Lead', { content_name: 'Amity Online MBA' }, { eventID: id });
+  }
+})();
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=1878608889840802&ev=PageView&noscript=1"
