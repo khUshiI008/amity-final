@@ -412,6 +412,24 @@ to{transform:translateX(0)}}
 .partners-enquiry{display:none}
 .partners-enquiry.open{display:flex}
 
+
+/* --- Mobile OTP --- */
+.form-card .phone-shell-full{position:relative}
+.otp-send{flex:0 0 auto;margin-left:auto;border:0;border-radius:4px;background:var(--navy,#092b50);color:#fff;font:800 11px/1 inherit;padding:0 14px;min-height:30px;margin-right:6px;cursor:pointer;letter-spacing:.02em;white-space:nowrap}
+.otp-send:disabled{background:#b9c3ce;cursor:not-allowed}
+.otp-verified{flex:0 0 auto;margin:0 10px 0 auto;font-size:11px;font-weight:800;color:#1f7a45;white-space:nowrap}
+.otp-verified[hidden],.otp-panel[hidden]{display:none}
+.phone-shell-full.is-verified{border-color:#1f7a45;background:#f2faf5}
+.otp-panel{margin-top:8px;padding:11px;border:1px dashed #9db3c8;border-radius:6px;background:#f3f7fb}
+.otp-msg{margin:0 0 8px;font-size:11.5px;line-height:1.4;color:#41546a}
+.otp-msg.err{color:#b3261e}
+.otp-row{display:flex;gap:8px}
+.form-card .otp-row input{flex:1;min-width:0;min-height:42px;border:1px solid #d4dce5;border-radius:5px;text-align:center;font-size:18px;font-weight:800;letter-spacing:.35em;padding:0 8px}
+.otp-verify{flex:0 0 auto;border:0;border-radius:5px;background:var(--navy,#092b50);color:#fff;font-weight:800;font-size:12px;padding:0 20px;cursor:pointer}
+.otp-verify:disabled{opacity:.6;cursor:wait}
+.otp-foot{display:flex;justify-content:space-between;margin-top:7px}
+.otp-link{border:0;background:none;padding:0;color:var(--navy,#092b50);font-size:11.5px;font-weight:700;text-decoration:underline;cursor:pointer}
+.otp-link:disabled{color:#8795a5;text-decoration:none;cursor:default}
 </style>
 <!-- Meta Pixel Code -->
 <script>
@@ -541,7 +559,12 @@ button,input,select,textarea{font-family:var(--sans)}
    <div class="field"><label for="email">Email address</label><input autocomplete="email" id="email" name="email" placeholder="Enter Email Address *" required type="email"/></div>
    <div class="field">
     <label for="phone">Mobile number</label>
-    <div class="phone-shell phone-shell-full"><span class="country">+91</span><input autocomplete="tel-national" id="phone" inputmode="numeric" maxlength="10" name="phone" placeholder="Enter Mobile Number *" required type="tel"/></div>
+    <div class="phone-shell phone-shell-full"><span class="country">+91</span><input autocomplete="tel-national" id="phone" inputmode="numeric" maxlength="10" name="phone" placeholder="Enter Mobile Number *" required type="tel"/><button type="button" class="otp-send" id="otpSend" disabled>Send OTP</button><span class="otp-verified" id="otpVerified" hidden>&#10003; Verified <button type="button" class="otp-link" id="otpEdit">Change</button></span></div>
+    <div class="otp-panel" id="otpPanel" hidden>
+     <p class="otp-msg" id="otpMsg" role="status"></p>
+     <div class="otp-row"><input id="otpInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Enter OTP" aria-label="OTP"/><button type="button" class="otp-verify" id="otpVerify">Verify</button></div>
+     <div class="otp-foot"><button type="button" class="otp-link" id="otpResend" disabled>Resend OTP</button><button type="button" class="otp-link" id="otpChange">Change number</button></div>
+    </div>
    </div>
    <div class="field"><label for="state">State</label><select id="state" name="state" required><option disabled selected value="">Select State *</option>
     <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option><option>Andaman and Nicobar Islands</option><option>Chandigarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Jammu and Kashmir</option><option>Ladakh</option><option>Lakshadweep</option><option>Puducherry</option>
@@ -650,16 +673,64 @@ button,input,select,textarea{font-family:var(--sans)}
  const submitBtn=form.querySelector('button[type="submit"]');
  const warn=m=>{response.style.display='block';response.style.background='#fff4c7';response.textContent=m};
  let sending=false;
+ /* ===== MSG91 OTP (widget in exposeMethods mode; same widget as the GLA page) ===== */
+ const OTP_LEN=4; /* must match "OTP length" in the MSG91 widget settings (default 4) */
+ const otpCfg={widgetId:'366b6e6f336e303830353332',tokenAuth:'590081TUBBrfKL6af884adP1',exposeMethods:true,success(){},failure(){}};
+ (function load(urls){let i=0;(function next(){const sc=document.createElement('script');sc.src=urls[i];sc.async=true;
+  sc.onload=()=>{if(typeof window.initSendOTP==='function')window.initSendOTP(otpCfg)};
+  sc.onerror=()=>{i++;if(i<urls.length)next()};document.head.appendChild(sc)})()})(['https://verify.msg91.com/otp-provider.js','https://verify.phone91.com/otp-provider.js']);
+ const $=id=>document.getElementById(id);
+ const o={send:$('otpSend'),ver:$('otpVerified'),edit:$('otpEdit'),panel:$('otpPanel'),msg:$('otpMsg'),inp:$('otpInput'),verify:$('otpVerify'),resend:$('otpResend'),change:$('otpChange'),shell:phone.closest('.phone-shell')};
+ let otpOk=false,otpToken='',otpMobile='',cool=0,tick=null,otpBusy=false,pendingSubmit=false;
+ const mobOk=()=>/^[6-9]\d{9}$/.test(phone.value)&&!/^(\d)\1{9}$/.test(phone.value);
+ const mask=m=>'+91 '+m.slice(0,2)+'\u2022\u2022\u2022 \u2022\u2022'+m.slice(-3);
+ const setMsg=(t,err)=>{o.msg.textContent=t;o.msg.classList.toggle('err',!!err)};
+ const refreshSend=()=>{o.send.disabled=!(mobOk()&&!otpBusy&&cool<=0&&!otpOk)};
+ const errText=(e,d)=>!e?d:(typeof e==='string'?e:(e.message||e.error||d));
+ const wSend=id=>new Promise(res=>{if(typeof window.sendOtp!=='function')return res({ok:false,error:'OTP service is still loading. Please try again in a moment.'});
+  try{window.sendOtp(id,d=>res({ok:true,d}),e=>res({ok:false,error:errText(e,'Could not send OTP. Please try again.')}))}catch(x){res({ok:false,error:'Could not send OTP. Please try again.'})}});
+ const wVerify=code=>new Promise(res=>{if(typeof window.verifyOtp!=='function')return res({ok:false,error:'OTP service is still loading. Please try again.'});
+  try{window.verifyOtp(code,d=>{const t=d&&(d.message||d.token);t?res({ok:true,token:t}):res({ok:false,error:'Incorrect OTP.'})},e=>res({ok:false,error:errText(e,'Incorrect OTP. Please check and try again.')}))}catch(x){res({ok:false,error:'Could not verify. Please try again.'})}});
+ const startCool=n=>{cool=n;clearInterval(tick);const paint=()=>{o.resend.disabled=cool>0;o.resend.textContent=cool>0?'Resend OTP in '+cool+'s':'Resend OTP';refreshSend()};paint();tick=setInterval(()=>{cool--;paint();if(cool<=0)clearInterval(tick)},1000)};
+ const resetOtp=()=>{otpOk=false;otpToken='';otpMobile='';phone.readOnly=false;o.ver.hidden=true;o.send.hidden=false;o.shell.classList.remove('is-verified');refreshSend()};
+ const closePanel=()=>{o.panel.hidden=true;o.inp.value='';clearInterval(tick)};
+ const sendOtp=()=>{
+  if(!mobOk()){warn('Enter a valid 10-digit Indian mobile number.');phone.focus();return Promise.resolve(false)}
+  otpBusy=true;o.send.textContent='Sending\u2026';refreshSend();o.resend.disabled=true;
+  return wSend('91'+phone.value).then(r=>{otpBusy=false;o.send.textContent='Send OTP';
+   if(r.ok){response.style.display='none';o.panel.hidden=false;o.inp.value='';setMsg('OTP sent to '+mask(phone.value)+'. It is valid for 5 minutes.');startCool(30);setTimeout(()=>o.inp.focus(),60);refreshSend();return true}
+   refreshSend();warn(r.error);return false});
+ };
+ const verifyOtp=()=>{
+  const code=o.inp.value.trim();
+  if(!new RegExp('^\\d{4,6}$').test(code)){setMsg('Enter the OTP sent to your mobile.',true);o.inp.focus();return}
+  o.verify.disabled=true;o.verify.textContent='Checking\u2026';
+  wVerify(code).then(r=>{o.verify.disabled=false;o.verify.textContent='Verify';
+   if(r.ok){otpOk=true;otpToken=r.token;otpMobile=phone.value;phone.readOnly=true;closePanel();o.send.hidden=true;o.ver.hidden=false;o.shell.classList.add('is-verified');response.style.display='none';
+    if(pendingSubmit){pendingSubmit=false;form.requestSubmit?form.requestSubmit():form.dispatchEvent(new Event('submit',{cancelable:true}))}}
+   else{setMsg(r.error||'Incorrect OTP.',true);o.inp.select()}});
+ };
+ o.send.addEventListener('click',sendOtp);
+ o.resend.addEventListener('click',()=>{if(cool<=0)sendOtp()});
+ o.verify.addEventListener('click',verifyOtp);
+ o.inp.addEventListener('input',()=>{o.inp.value=o.inp.value.replace(/\D/g,'').slice(0,6);if(o.inp.value.length===OTP_LEN)verifyOtp()});
+ o.inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();verifyOtp()}});
+ o.change.addEventListener('click',()=>{closePanel();phone.focus();phone.select()});
+ o.edit.addEventListener('click',()=>{resetOtp();phone.focus();phone.select()});
+ phone.addEventListener('input',()=>{if(otpOk&&phone.value!==otpMobile)resetOtp();refreshSend()});
+ phone.addEventListener('keydown',e=>{if(e.key==='Enter'&&mobOk()&&!otpOk&&o.panel.hidden){e.preventDefault();sendOtp()}});
+ refreshSend();
  phone.addEventListener('input',()=>{phone.value=phone.value.replace(/\D/g,'').slice(0,10)});
  form.addEventListener('submit',async e=>{
   e.preventDefault();if(sending)return;
   if(!/^[6-9]\d{9}$/.test(phone.value)){warn('Enter a valid 10-digit Indian mobile number.');phone.focus();return}
   if(!form.checkValidity()){warn('Please complete all required fields and give consent.');form.reportValidity();return}
   if(form.elements.company_website&&form.elements.company_website.value){location.href=THANK_YOU_URL;return}
+  if(!otpOk){pendingSubmit=true;if(o.panel.hidden&&!otpBusy){sendOtp().then(ok=>{if(ok)setMsg('We sent an OTP to '+mask(phone.value)+'. Enter it to finish.');else pendingSubmit=false})}else{setMsg('Enter the OTP sent to '+mask(phone.value)+' to finish.',true);o.inp.focus()}return}
   if(!GOOGLE_SCRIPT_URL||GOOGLE_SCRIPT_URL.indexOf('PASTE_')===0){warn('The form is not connected yet. Add the Google Apps Script URL in the page settings.');return}
   sending=true;submitBtn.disabled=true;submitBtn.textContent='Submitting…';response.style.display='none';
   const data=new URLSearchParams(new FormData(form));
-  data.delete('company_website');data.set('consent','Yes');
+  data.delete('company_website');data.set('consent','Yes');data.set('otpVerified','Yes');data.set('otpToken',otpToken);
   const q=new URLSearchParams(location.search);
   data.set('pageUrl',location.href.split('#')[0]);
   ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(k=>data.set(k,q.get(k)||''));
