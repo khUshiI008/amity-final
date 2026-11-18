@@ -431,23 +431,14 @@ to{transform:translateX(0)}}
 .otp-link{border:0;background:none;padding:0;color:var(--navy,#092b50);font-size:11.5px;font-weight:700;text-decoration:underline;cursor:pointer}
 .otp-link:disabled{color:#8795a5;text-decoration:none;cursor:default}
 </style>
-<!-- Meta Pixel Code -->
+<!-- Google Tag Manager -->
+<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-MGSRGS27"></script>
 <script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1878608889840802');
-fbq('track', 'PageView');
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 </script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1878608889840802&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
+<!-- End Google Tag Manager -->
 </head>
 <body id="top">
 <style>.scholarship-topline{min-height:32px;display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 16px;background:var(--gold);color:#071b30;text-align:center;font-size:12px;line-height:1.35}.scholarship-topline strong{font-weight:900;letter-spacing:.02em}@media(max-width:600px){.scholarship-topline{font-size:10px;padding:7px 10px;flex-wrap:wrap;gap:4px}}
@@ -694,10 +685,13 @@ button,input,select,textarea{font-family:var(--sans)}
  const startCool=n=>{cool=n;clearInterval(tick);const paint=()=>{o.resend.disabled=cool>0;o.resend.textContent=cool>0?'Resend OTP in '+cool+'s':'Resend OTP';refreshSend()};paint();tick=setInterval(()=>{cool--;paint();if(cool<=0)clearInterval(tick)},1000)};
  const resetOtp=()=>{otpOk=false;otpToken='';otpMobile='';phone.readOnly=false;o.ver.hidden=true;o.send.hidden=false;o.shell.classList.remove('is-verified');refreshSend()};
  const closePanel=()=>{o.panel.hidden=true;o.inp.value='';clearInterval(tick)};
+ const DUP_MSG='This mobile number is already registered with us. Our counsellor will contact you shortly.';
+ /* ask the sheet script whether this number was already submitted (fails open if unreachable) */
+ const isDup=m=>fetch(GOOGLE_SCRIPT_URL+'?check='+encodeURIComponent(m)+'&lp=amity-online').then(r=>r.json()).then(j=>!!(j&&j.duplicate)).catch(()=>false);
  const sendOtp=()=>{
   if(!mobOk()){warn('Enter a valid 10-digit Indian mobile number.');phone.focus();return Promise.resolve(false)}
   otpBusy=true;o.send.textContent='Sending\u2026';refreshSend();o.resend.disabled=true;
-  return wSend('91'+phone.value).then(r=>{otpBusy=false;o.send.textContent='Send OTP';
+  return isDup(phone.value).then(d=>d?{ok:false,error:DUP_MSG}:wSend('91'+phone.value)).then(r=>{otpBusy=false;o.send.textContent='Send OTP';
    if(r.ok){response.style.display='none';o.panel.hidden=false;o.inp.value='';setMsg('OTP sent to '+mask(phone.value)+'. It is valid for 5 minutes.');startCool(30);setTimeout(()=>o.inp.focus(),60);refreshSend();return true}
    refreshSend();warn(r.error);return false});
  };
@@ -730,20 +724,29 @@ button,input,select,textarea{font-family:var(--sans)}
   if(!GOOGLE_SCRIPT_URL||GOOGLE_SCRIPT_URL.indexOf('PASTE_')===0){warn('The form is not connected yet. Add the Google Apps Script URL in the page settings.');return}
   sending=true;submitBtn.disabled=true;submitBtn.textContent='Submitting…';response.style.display='none';
   const data=new URLSearchParams(new FormData(form));
-  data.delete('company_website');data.set('consent','Yes');data.set('otpVerified','Yes');data.set('otpToken',otpToken);
+  data.delete('company_website');data.set('consent','Yes');data.set('otpVerified','Yes');data.set('otpToken',otpToken);data.set('lp','amity-online');const leadId='lead_'+Date.now()+'_'+Math.random().toString(36).slice(2,10);data.set('lead_id',leadId);
   const q=new URLSearchParams(location.search);
   data.set('pageUrl',location.href.split('#')[0]);
   ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(k=>data.set(k,q.get(k)||''));
   data.set('device',navigator.userAgent);
   try{sessionStorage.setItem('leadName',form.elements.fullName.value.trim())}catch(_){}
+  let res=null;
   try{
-   await Promise.race([fetch(GOOGLE_SCRIPT_URL,{method:'POST',mode:'no-cors',body:data}),new Promise(r=>setTimeout(r,8000))]);
+   const r=await Promise.race([fetch(GOOGLE_SCRIPT_URL,{method:'POST',body:data}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))]);
+   try{res=await r.json()}catch(_){}
   }catch(err){
+   /* response unreadable or slow: re-send once without reading it (the sheet script ignores repeats) */
+   try{await fetch(GOOGLE_SCRIPT_URL,{method:'POST',mode:'no-cors',body:data})}catch(err2){
+    sending=false;submitBtn.disabled=false;submitBtn.textContent='Submit Details';
+    warn('We could not submit your details. Please check your connection and try again.');return;
+   }
+  }
+  if(res&&(res.duplicate||res.ok===false)){
    sending=false;submitBtn.disabled=false;submitBtn.textContent='Submit Details';
-   warn('We could not submit your details. Please check your connection and try again.');return;
+   warn(res.duplicate?DUP_MSG:(res.error||'Something went wrong. Please try again.'));return;
   }
   /* Request was sent without a network error: allow ONE Lead event on the thank-you page */
-  try{sessionStorage.setItem('leadEventId','lead_'+Date.now()+'_'+Math.random().toString(36).slice(2,10))}catch(_){}
+  try{sessionStorage.setItem('leadEventId',leadId)}catch(_){}
   location.href=THANK_YOU_URL;
  });
 

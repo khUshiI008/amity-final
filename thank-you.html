@@ -30,38 +30,24 @@ h1{font-size:clamp(28px,5vw,38px);line-height:1.12;letter-spacing:-.035em;color:
 .note{font-size:11px;color:#7d8997;margin:22px 0 0;line-height:1.5}
 @media(max-width:520px){.card{padding:32px 20px}.btn{width:100%}}
 </style>
-<!-- Meta Pixel Code -->
+<!-- Google Tag Manager -->
+<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-MGSRGS27"></script>
 <script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1878608889840802');
-fbq('track', 'PageView');
-
-/* Lead: fires ONLY once, right after a successful form submission.
-   index.html sets 'leadEventId' in sessionStorage after the form data is sent.
-   It is removed here as soon as it is read, so a refresh, back/forward visit or
-   a direct visit to this page does not fire Lead again. */
-(function () {
-  var id = null;
-  try {
-    id = sessionStorage.getItem('leadEventId');
-    if (id) sessionStorage.removeItem('leadEventId');
-  } catch (e) {}
-  if (id) {
-    fbq('track', 'Lead', { content_name: 'Amity Online MBA' }, { eventID: id });
-  }
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>
+<!-- End Google Tag Manager -->
+<script>
+/* Lead signal for GTM: fires ONLY once, right after a successful form submission.
+   index.html sets 'leadEventId' in sessionStorage; it is removed as soon as it is read, so a
+   refresh, back/forward visit or direct visit does not push the event again. */
+(function(){
+  var id=null;
+  try{ id=sessionStorage.getItem('leadEventId'); if(id) sessionStorage.removeItem('leadEventId'); }catch(e){}
+  if(id){ window.dataLayer=window.dataLayer||[]; window.dataLayer.push({event:'lead_thankyou_view',lp:'amity-online',event_id:id}); }
 })();
 </script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1878608889840802&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
 </head>
 <body>
 <header><div class="bar">
